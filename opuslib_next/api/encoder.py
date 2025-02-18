@@ -70,6 +70,7 @@ def create_state(fs: int, channels: int, application: int) -> ctypes.Structure:
 
 
 libopus_ctl = opuslib_next.api.libopus.opus_encoder_ctl
+libopus_ctl.argtypes = (EncoderPointer, ctypes.c_int,)
 libopus_ctl.restype = ctypes.c_int
 
 
@@ -136,8 +137,7 @@ def encode(
     )
 
     if result < 0:
-        raise opuslib_next.OpusError(
-            'Opus Encoder returned result="{}"'.format(result))
+        raise opuslib_next.OpusError(result)
 
     return array.array('b', opus_data[:result]).tobytes()
 
@@ -173,8 +173,7 @@ def encode_float(
     )
 
     if result < 0:
-        raise opuslib_next.OpusError(
-            'Encoder returned result="{}"'.format(result))
+        raise opuslib_next.OpusError(result)
 
     return array.array('b', opus_data[:result]).tobytes()
 

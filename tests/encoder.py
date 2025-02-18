@@ -247,7 +247,7 @@ class EncoderTest(unittest.TestCase):
         self.check_setget(
             opuslib_next.api.ctl.set_inband_fec,
             opuslib_next.api.ctl.get_inband_fec,
-            (-1, 2),
+            (-1, 3),
             (1, 0)
         )
 
