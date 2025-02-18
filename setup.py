@@ -5,20 +5,18 @@
 
 import setuptools  # type: ignore
 
-__author__ = 'Никита Кузнецов <self@svartalf.info>'
-__copyright__ = 'Copyright (c) 2012, SvartalF'
+__author__ = 'kalicyh <kalicyh@qq.com>'
+__copyright__ = 'Copyright (c) 2025, Kalicyh'
 __license__ = 'BSD 3-Clause License'
 
 
 setuptools.setup(
-    name='opuslib',
-    version='3.0.3',
-    author='Никита Кузнецов',
-    author_email='self@svartalf.info',
-    maintainer='Orion Labs, Inc.',
-    maintainer_email='code@orionlabs.io',
+    name='opuslib-next',
+    version='1.0.0',
+    author='kalicyh',
+    author_email='kalicyh@qq.com',
     license='BSD 3-Clause License',
-    url='https://github.com/onbeep/opuslib',
+    url='https://github.com/kalicyh/opuslib-next',
     description='Python bindings to the libopus, IETF low-delay audio codec',
     packages=('opuslib', 'opuslib.api'),
     test_suite='tests',

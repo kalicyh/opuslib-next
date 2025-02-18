@@ -1,7 +1,7 @@
 # Makefile for opuslib.
 #
-# Author:: Никита Кузнецов <self@svartalf.info>
-# Copyright:: Copyright (c) 2012, SvartalF
+# Author:: kalicyh <kalicyh@qq.com>
+# Copyright:: Copyright (c) 2025, Kalicyh
 # License:: BSD 3-Clause License
 #
 

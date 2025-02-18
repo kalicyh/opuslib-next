@@ -11,8 +11,8 @@ import opuslib.api.ctl
 import opuslib.api.decoder
 import opuslib.api.encoder
 
-__author__ = 'Никита Кузнецов <self@svartalf.info>'
-__copyright__ = 'Copyright (c) 2012, SvartalF'
+__author__ = 'kalicyh <kalicyh@qq.com>'
+__copyright__ = 'Copyright (c) 2025, Kalicyh'
 __license__ = 'BSD 3-Clause License'
 
 
