@@ -2,6 +2,22 @@
 
 Python bindings to the libopus, IETF low-delay audio codec
 
+**Usage**  
+------------
+
+The usage remains the same as the original `opuslib`, except that now the library is called `opuslib_next`. You can install it using:
+
+```bash
+pip install opuslib-next
+```
+
+After installation, you can import and use it like before:
+
+```python
+import opuslib_next
+# your code here
+```
+
 **About the Fork**  
 ------------
 
