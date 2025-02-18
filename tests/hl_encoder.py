@@ -7,7 +7,7 @@
 
 import unittest
 
-import opuslib
+import opuslib_next
 
 __author__ = 'kalicyh <kalicyh@qq.com>'
 __copyright__ = 'Copyright (c) 2025, Kalicyh'
@@ -18,13 +18,13 @@ class EncoderTest(unittest.TestCase):
 
     def test_create(self):
         try:
-            opuslib.Encoder(1000, 3, opuslib.APPLICATION_AUDIO)
-        except opuslib.OpusError as ex:
-            self.assertEqual(ex.code, opuslib.BAD_ARG)
+            opuslib_next.Encoder(1000, 3, opuslib_next.APPLICATION_AUDIO)
+        except opuslib_next.OpusError as ex:
+            self.assertEqual(ex.code, opuslib_next.BAD_ARG)
 
-        opuslib.Encoder(48000, 2, opuslib.APPLICATION_AUDIO)
+        opuslib_next.Encoder(48000, 2, opuslib_next.APPLICATION_AUDIO)
 
     @classmethod
     def test_reset_state(cls):
-        encoder = opuslib.Encoder(48000, 2, opuslib.APPLICATION_AUDIO)
+        encoder = opuslib_next.Encoder(48000, 2, opuslib_next.APPLICATION_AUDIO)
         encoder.reset_state()
