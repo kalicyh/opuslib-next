@@ -6,7 +6,8 @@
 """OpusLib Package."""
 
 import ctypes  # type: ignore
-
+import os
+import platform
 from ctypes.util import find_library  # type: ignore
 
 __author__ = 'kalicyh <kalicyh@qq.com>'
@@ -16,6 +17,19 @@ __license__ = 'BSD 3-Clause License'
 
 lib_location = find_library('opus')
 
+if lib_location is None:
+    # find opus library in macOS
+    if platform.system() == 'Darwin':
+        lib_paths = [
+            '/opt/homebrew/lib/libopus.dylib',
+            '/usr/local/lib/libopus.dylib',
+        ]
+        
+        for path in lib_paths:
+            if os.path.exists(path):
+                lib_location = path
+                break
+    
 if lib_location is None:
     raise Exception(
         'Could not find Opus library. Make sure it is installed.')
