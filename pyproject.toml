@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "opuslib_next"
-version = "1.1.3"
+version = "1.1.4"
 description = "Python bindings to the libopus, IETF low-delay audio codec"
 authors = ["kalicyh <kalicyh@qq.com>"]
 readme = "README.md"
@@ -10,11 +10,11 @@ documentation = "https://github.com/kalicyh/opuslib-next"
 repository = "https://github.com/kalicyh/opuslib-next/issues"
 
 [tool.poetry.dependencies]
-
+python = "^3.10"
 
 
 [tool.poetry.group.dev.dependencies]
-python = "^3.13"
+python = "^3.10"
 setuptools = "^75.8.0"
 wheel = "^0.45.1"
 twine = "^6.1.0"
