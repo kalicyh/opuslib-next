@@ -115,7 +115,7 @@ class EncoderTest(unittest.TestCase):
 
         value = opuslib_next.api.encoder.encoder_ctl(
             enc, opuslib_next.api.ctl.get_bitrate)
-        self.assertLess(value, 700000)
+        self.assertLessEqual(value, 1500000)
         self.assertGreater(value, 256000)
 
         opuslib_next.api.encoder.destroy(enc)

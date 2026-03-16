@@ -211,6 +211,13 @@ class DecoderTest(unittest.TestCase):
                 _bwx, opuslib_next.api.decoder.packet_get_bandwidth(packet)
             )
 
+    def test_packet_get_samples_per_frame(self):
+        packet = bytes([0])
+        self.assertEqual(
+            480,
+            opuslib_next.api.decoder.packet_get_samples_per_frame(packet, 48000)
+        )
+
     def test_decode(self):
         """opus_decode()"""
 
