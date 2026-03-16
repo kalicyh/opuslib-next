@@ -1,0 +1,80 @@
+name: Performance
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    name: Benchmark (${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.6.4"
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install libopus
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libopus0 libopus-dev
+
+      - name: Resolve latest published version
+        id: latest
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import urllib.request
+
+          with urllib.request.urlopen("https://pypi.org/pypi/opuslib-next/json", timeout=30) as response:
+              payload = json.load(response)
+
+          print(f"version={payload['info']['version']}")
+          PY
+
+      - name: Sync dependencies
+        run: uv sync --dev --frozen --python "${{ steps.setup-python.outputs.python-path }}"
+
+      - name: Run benchmark comparison
+        run: |
+          mkdir -p bench-results
+          uv run --python "${{ steps.setup-python.outputs.python-path }}" \
+            python benchmarks/compare_versions.py \
+            --baseline-version "${{ steps.latest.outputs.version }}" \
+            --output-json "bench-results/python-${{ matrix.python-version }}.json" \
+            | tee "bench-results/python-${{ matrix.python-version }}.txt"
+
+      - name: Write job summary
+        run: |
+          uv run --python "${{ steps.setup-python.outputs.python-path }}" \
+            python benchmarks/render_summary.py \
+            "bench-results/python-${{ matrix.python-version }}.json" \
+            --python-version "${{ matrix.python-version }}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload benchmark artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: benchmark-python-${{ matrix.python-version }}
+          path: bench-results/
