@@ -6,6 +6,9 @@ sync:
 test:
 	uv run pytest
 
+bench:
+	@echo "Usage: uv run python benchmarks/compare_versions.py --baseline-version <version>"
+
 build:
 	uv build
 

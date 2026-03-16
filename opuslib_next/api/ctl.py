@@ -32,7 +32,7 @@ def query(request):
     def inner(func, obj):
         result_code = func(obj, request)
 
-        if result_code is not opuslib_next.OK:
+        if result_code != opuslib_next.OK:
             raise opuslib_next.exceptions.OpusError(result_code)
 
         return result_code
@@ -48,7 +48,7 @@ def get(request, result_type):
         result = result_type()
         result_code = func(obj, request, ctypes.byref(result))
 
-        if result_code is not opuslib_next.OK:
+        if result_code != opuslib_next.OK:
             raise opuslib_next.exceptions.OpusError(result_code)
 
         return result.value
@@ -62,7 +62,7 @@ def ctl_set(request):
 
     def inner(func, obj, value):
         result_code = func(obj, request, value)
-        if result_code is not opuslib_next.OK:
+        if result_code != opuslib_next.OK:
             raise opuslib_next.exceptions.OpusError(result_code)
 
     return inner

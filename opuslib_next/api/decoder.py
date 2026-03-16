@@ -152,7 +152,10 @@ def packet_get_samples_per_frame(
     """Gets the number of samples per frame from an Opus packet"""
     data_pointer = ctypes.c_char_p(data)
 
-    result = libopus_packet_get_nb_frames(data_pointer, ctypes.c_int(fs))
+    result = libopus_packet_get_samples_per_frame(
+        data_pointer,
+        ctypes.c_int(fs)
+    )
 
     if result < 0:
         raise opuslib_next.exceptions.OpusError(result)
@@ -229,7 +232,7 @@ def decode(  # pylint: disable=too-many-arguments
     _decode_fec = int(decode_fec)
     result = 0
 
-    pcm_size = frame_size * channels * ctypes.sizeof(ctypes.c_int16)
+    pcm_size = frame_size * channels
     pcm = (ctypes.c_int16 * pcm_size)()
     pcm_pointer = ctypes.cast(pcm, opuslib_next.api.c_int16_pointer)
 
@@ -277,7 +280,7 @@ def decode_float(  # pylint: disable=too-many-arguments
     """
     _decode_fec = int(decode_fec)
 
-    pcm_size = frame_size * channels * ctypes.sizeof(ctypes.c_float)
+    pcm_size = frame_size * channels
     pcm = (ctypes.c_float * pcm_size)()
     pcm_pointer = ctypes.cast(pcm, opuslib_next.api.c_float_pointer)
 

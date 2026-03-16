@@ -23,6 +23,7 @@ This project now uses a standard `pyproject.toml` and can be managed with `uv`.
 ```bash
 uv sync --dev
 uv run pytest
+uv run python benchmarks/compare_versions.py --baseline-version 1.1.5
 uv build
 uv publish
 ```
