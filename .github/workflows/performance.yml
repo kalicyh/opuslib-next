@@ -32,9 +32,7 @@ jobs:
           enable-cache: true
 
       - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
 
       - name: Install libopus
         run: |
@@ -55,12 +53,12 @@ jobs:
           PY
 
       - name: Sync dependencies
-        run: uv sync --dev --frozen --python "${{ steps.setup-python.outputs.python-path }}"
+        run: uv sync --dev --frozen --python ${{ matrix.python-version }}
 
       - name: Run benchmark comparison
         run: |
           mkdir -p bench-results
-          uv run --python "${{ steps.setup-python.outputs.python-path }}" \
+          uv run --python ${{ matrix.python-version }} \
             python benchmarks/compare_versions.py \
             --baseline-version "${{ steps.latest.outputs.version }}" \
             --output-json "bench-results/python-${{ matrix.python-version }}.json" \
@@ -68,7 +66,7 @@ jobs:
 
       - name: Write job summary
         run: |
-          uv run --python "${{ steps.setup-python.outputs.python-path }}" \
+          uv run --python ${{ matrix.python-version }} \
             python benchmarks/render_summary.py \
             "bench-results/python-${{ matrix.python-version }}.json" \
             --python-version "${{ matrix.python-version }}" >> "$GITHUB_STEP_SUMMARY"
