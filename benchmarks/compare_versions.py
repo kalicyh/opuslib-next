@@ -22,6 +22,8 @@ import opuslib_next
 FS = 48000
 CHANNELS = 2
 FRAME_SIZE = 960
+WARMUP_ROUNDS = 5
+MEASURE_ROUNDS = 15
 
 
 def make_pcm16():
@@ -43,8 +45,12 @@ def make_pcm_float():
 
 
 def measure(name, iterations, fn):
+    for _ in range(WARMUP_ROUNDS):
+        for _ in range(iterations):
+            fn()
+
     samples = []
-    for _ in range(5):
+    for _ in range(MEASURE_ROUNDS):
         start = time.perf_counter()
         for _ in range(iterations):
             fn()
@@ -52,13 +58,18 @@ def measure(name, iterations, fn):
 
     best = min(samples)
     avg = statistics.mean(samples)
+    median = statistics.median(samples)
     return {
         "name": name,
         "iterations": iterations,
+        "warmup_rounds": WARMUP_ROUNDS,
+        "measure_rounds": MEASURE_ROUNDS,
         "best_seconds": best,
         "avg_seconds": avg,
+        "median_seconds": median,
         "best_us_per_op": best / iterations * 1_000_000,
         "avg_us_per_op": avg / iterations * 1_000_000,
+        "median_us_per_op": median / iterations * 1_000_000,
     }
 
 
@@ -81,12 +92,12 @@ def create_destroy_decoder():
     del instance
 
 results = [
-    measure("encoder_create_destroy", 500, create_destroy_encoder),
-    measure("decoder_create_destroy", 500, create_destroy_decoder),
-    measure("encode_pcm16", 2000, lambda: encoder.encode(pcm16, FRAME_SIZE)),
-    measure("encode_float", 2000, lambda: encoder.encode_float(pcm_float, FRAME_SIZE)),
-    measure("decode_pcm16", 2000, lambda: decoder.decode(packet, FRAME_SIZE)),
-    measure("decode_float", 2000, lambda: decoder.decode_float(float_packet, FRAME_SIZE)),
+    measure("encoder_create_destroy", 5000, create_destroy_encoder),
+    measure("decoder_create_destroy", 5000, create_destroy_decoder),
+    measure("encode_pcm16", 10000, lambda: encoder.encode(pcm16, FRAME_SIZE)),
+    measure("encode_float", 10000, lambda: encoder.encode_float(pcm_float, FRAME_SIZE)),
+    measure("decode_pcm16", 10000, lambda: decoder.decode(packet, FRAME_SIZE)),
+    measure("decode_float", 10000, lambda: decoder.decode_float(float_packet, FRAME_SIZE)),
 ]
 
 print(json.dumps({
@@ -143,13 +154,13 @@ def run_benchmark(python_path: Path) -> dict:
 
 
 def compare_metric(baseline_metric: dict, candidate_metric: dict) -> dict:
-    baseline = baseline_metric["best_us_per_op"]
-    candidate = candidate_metric["best_us_per_op"]
+    baseline = baseline_metric["median_us_per_op"]
+    candidate = candidate_metric["median_us_per_op"]
     delta = candidate - baseline
     change_pct = (delta / baseline) * 100 if baseline else 0.0
     return {
-        "baseline_us_per_op": baseline,
-        "candidate_us_per_op": candidate,
+        "baseline_median_us_per_op": baseline,
+        "candidate_median_us_per_op": candidate,
         "delta_us_per_op": delta,
         "change_pct": change_pct,
     }
@@ -164,8 +175,8 @@ def format_table(baseline_results: dict[str, dict], candidate_results: dict[str,
         comparison = compare_metric(baseline_results[name], candidate_results[name])
         lines.append(
             f"{name:24} "
-            f"{comparison['baseline_us_per_op']:14.2f} "
-            f"{comparison['candidate_us_per_op']:14.2f} "
+            f"{comparison['baseline_median_us_per_op']:14.2f} "
+            f"{comparison['candidate_median_us_per_op']:14.2f} "
             f"{comparison['change_pct']:10.2f}"
         )
     return "\n".join(lines)
