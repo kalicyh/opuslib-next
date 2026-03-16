@@ -1,29 +1,34 @@
-# **python-opus**
+# python-opus
 
-Python bindings to the libopus, IETF low-delay audio codec
+Python bindings to the libopus, IETF low-delay audio codec.
 
-**Usage**  
-------------
-
-The usage remains the same as the original `opuslib`, except that now the library is called `opuslib_next`. You can install it using:
+## Installation
 
 ```bash
 pip install opuslib-next
 ```
 
-After installation, you can import and use it like before:
+## Usage
+
+The API remains compatible with the original `opuslib`, but the package name is now `opuslib_next`.
 
 ```python
 import opuslib_next
-# your code here
 ```
 
-**About the Fork**  
-------------
+## Development
 
-Since the original author of [opuslib](https://github.com/orion-labs/opuslib) has not maintained or updated the library for a long time, I decided to fork and update it to fix issues.
+This project now uses a standard `pyproject.toml` and can be managed with `uv`.
 
-**Contributing**  
--------------
+```bash
+uv sync --dev
+uv run pytest
+uv build
+uv publish
+```
 
-If you want to contribute, please follow the [pep8](http://www.python.org/dev/peps/pep-0008/) guideline and include tests.
+If you publish to PyPI, configure credentials first, for example with `UV_PUBLISH_TOKEN` or `uv auth`.
+
+## About the Fork
+
+The original [opuslib](https://github.com/orion-labs/opuslib) is no longer actively maintained. This fork keeps the package working on newer Python versions and accepts fixes.

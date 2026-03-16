@@ -1,24 +1,45 @@
-[tool.poetry]
-name = "opuslib_next"
-version = "1.1.4"
-description = "Python bindings to the libopus, IETF low-delay audio codec"
-authors = ["kalicyh <kalicyh@qq.com>"]
-readme = "README.md"
-license = "BSD-3-Clause"
-homepage = "https://github.com/kalicyh/opuslib-next"
-documentation = "https://github.com/kalicyh/opuslib-next"
-repository = "https://github.com/kalicyh/opuslib-next/issues"
-
-[tool.poetry.dependencies]
-python = "^3.10"
-
-
-[tool.poetry.group.dev.dependencies]
-python = "^3.10"
-setuptools = "^75.8.0"
-wheel = "^0.45.1"
-twine = "^6.1.0"
-
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "opuslib-next"
+version = "1.1.5"
+description = "Python bindings to the libopus, IETF low-delay audio codec"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "BSD-3-Clause"
+authors = [
+    { name = "kalicyh", email = "kalicyh@qq.com" },
+]
+keywords = ["audio", "codec", "libopus", "opus"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Sound/Audio :: Conversion",
+    "Topic :: Software Development :: Libraries",
+]
+
+[project.urls]
+Homepage = "https://github.com/kalicyh/opuslib-next"
+Documentation = "https://github.com/kalicyh/opuslib-next"
+Repository = "https://github.com/kalicyh/opuslib-next"
+Issues = "https://github.com/kalicyh/opuslib-next/issues"
+
+[dependency-groups]
+dev = [
+    "build>=1.2.2",
+    "pytest>=8.3.5",
+    "twine>=6.1.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["opuslib_next"]
