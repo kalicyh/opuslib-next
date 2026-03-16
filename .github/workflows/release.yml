@@ -28,6 +28,11 @@ jobs:
       - name: Set up Python
         run: uv python install 3.12
 
+      - name: Install libopus
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libopus0 libopus-dev
+
       - name: Sync dependencies
         run: uv sync --dev --frozen --python 3.12
 
