@@ -301,7 +301,7 @@ class Encoder(object):
         self.encoder_state, opuslib_next.api.ctl.get_inband_fec)
 
     _set_inband_fec = lambda self, x: opuslib_next.api.encoder.encoder_ctl(
-        self.encoder_state, opuslib_next.api.ctl.set_inband_fec)
+        self.encoder_state, opuslib_next.api.ctl.set_inband_fec, x)
 
     inband_fec = property(_get_inband_fec, _set_inband_fec)
 
