@@ -27,6 +27,8 @@ from .classes import (  # NOQA
     Encoder,
     MultiStreamDecoder,
     MultiStreamEncoder,
+    ProjectionDecoder,
+    ProjectionEncoder,
 )
 
 __author__ = 'kalicyh <kalicyh@qq.com>'

@@ -12,6 +12,8 @@ import opuslib_next.api.decoder
 import opuslib_next.api.encoder
 import opuslib_next.api.multistream_decoder
 import opuslib_next.api.multistream_encoder
+import opuslib_next.api.projection_decoder
+import opuslib_next.api.projection_encoder
 
 __author__ = 'kalicyh <kalicyh@qq.com>'
 __copyright__ = 'Copyright (c) 2025, Kalicyh'
@@ -670,3 +672,424 @@ class MultiStreamEncoder(object):
             self.msencoder_state, opuslib_next.api.ctl.set_dtx, x)
 
     dtx = property(_get_dtx, _set_dtx)
+
+
+class ProjectionDecoder(object):
+
+    """High-Level ProjectionDecoder Object."""
+
+    def __init__(
+            self,
+            fs: int,
+            channels: int,
+            streams: int,
+            coupled_streams: int,
+            demixing_matrix: typing.Sequence[int]
+    ) -> None:
+        """
+        :param fs: Sample Rate.
+        :param channels: Number of output channels.
+        :param streams: Number of streams.
+        :param coupled_streams: Number of coupled streams.
+        :param demixing_matrix: Projection demixing matrix.
+        """
+        self._fs = fs
+        self._channels = channels
+        self._streams = streams
+        self._coupled_streams = coupled_streams
+        self._demixing_matrix = demixing_matrix
+        self.projection_decoder_state = \
+            opuslib_next.api.projection_decoder.create_state(
+                fs, channels, streams, coupled_streams, demixing_matrix)
+
+    def __del__(self) -> None:
+        if hasattr(self, 'projection_decoder_state'):
+            # Destroying state only if __init__ completed successfully
+            opuslib_next.api.projection_decoder.destroy(
+                self.projection_decoder_state)
+
+    def reset_state(self) -> None:
+        """
+        Resets the codec state to be equivalent to a freshly initialized state
+        """
+        opuslib_next.api.projection_decoder.decoder_ctl(
+            self.projection_decoder_state,
+            opuslib_next.api.ctl.reset_state
+        )
+
+    # FIXME: Remove typing.Any once we have a stub for ctypes
+    def decode(
+            self,
+            opus_data: bytes,
+            frame_size: int,
+            decode_fec: bool = False
+        ) -> typing.Union[bytes, typing.Any]:
+        """
+        Decodes given Opus data to PCM.
+        """
+        return opuslib_next.api.projection_decoder.decode(
+            self.projection_decoder_state,
+            opus_data,
+            len(opus_data),
+            frame_size,
+            decode_fec,
+            channels=self._channels
+        )
+
+    # FIXME: Remove typing.Any once we have a stub for ctypes
+    def decode_float(
+            self,
+            opus_data: bytes,
+            frame_size: int,
+            decode_fec: bool = False
+        ) -> typing.Union[bytes, typing.Any]:
+        """
+        Decodes given Opus data to PCM.
+        """
+        return opuslib_next.api.projection_decoder.decode_float(
+            self.projection_decoder_state,
+            opus_data,
+            len(opus_data),
+            frame_size,
+            decode_fec,
+            channels=self._channels
+        )
+
+    @property
+    def streams(self) -> int:
+        """Number of streams decoded from the input."""
+        return self._streams
+
+    @property
+    def coupled_streams(self) -> int:
+        """Number of coupled streams decoded from the input."""
+        return self._coupled_streams
+
+    # CTL interfaces
+
+    _get_final_range = \
+        lambda self: opuslib_next.api.projection_decoder.decoder_ctl(
+            self.projection_decoder_state,
+            opuslib_next.api.ctl.get_final_range)
+
+    final_range = property(_get_final_range)
+
+    _get_bandwidth = \
+        lambda self: opuslib_next.api.projection_decoder.decoder_ctl(
+            self.projection_decoder_state, opuslib_next.api.ctl.get_bandwidth)
+
+    bandwidth = property(_get_bandwidth)
+
+    _get_pitch = lambda self: opuslib_next.api.projection_decoder.decoder_ctl(
+        self.projection_decoder_state, opuslib_next.api.ctl.get_pitch)
+
+    pitch = property(_get_pitch)
+
+    _get_lsb_depth = \
+        lambda self: opuslib_next.api.projection_decoder.decoder_ctl(
+            self.projection_decoder_state,
+            opuslib_next.api.ctl.get_lsb_depth)
+
+    _set_lsb_depth = \
+        lambda self, x: opuslib_next.api.projection_decoder.decoder_ctl(
+            self.projection_decoder_state,
+            opuslib_next.api.ctl.set_lsb_depth,
+            x)
+
+    lsb_depth = property(_get_lsb_depth, _set_lsb_depth)
+
+    _get_gain = lambda self: opuslib_next.api.projection_decoder.decoder_ctl(
+        self.projection_decoder_state, opuslib_next.api.ctl.get_gain)
+
+    _set_gain = \
+        lambda self, x: opuslib_next.api.projection_decoder.decoder_ctl(
+            self.projection_decoder_state, opuslib_next.api.ctl.set_gain, x)
+
+    gain = property(_get_gain, _set_gain)
+
+
+class ProjectionEncoder(object):
+
+    """High-Level ProjectionEncoder Object."""
+
+    def __init__(
+            self,
+            fs: int,
+            channels: int,
+            mapping_family: int,
+            application: int
+    ) -> None:
+        """
+        Parameters:
+            fs : sampling rate
+            channels : number of channels
+            mapping_family : projection mapping family
+        """
+        # Check to see if the Encoder Application Macro is available:
+        if application in list(opuslib_next.APPLICATION_TYPES_MAP.keys()):
+            application = opuslib_next.APPLICATION_TYPES_MAP[application]
+        elif application in list(opuslib_next.APPLICATION_TYPES_MAP.values()):
+            pass  # Nothing to do here
+        else:
+            raise ValueError(
+                "`application` value must be in 'voip', 'audio' or "
+                "'restricted_lowdelay'")
+
+        self._fs = fs
+        self._channels = channels
+        self._mapping_family = mapping_family
+        self._application = application
+        self.projection_encoder_state, self._streams, self._coupled_streams = \
+            opuslib_next.api.projection_encoder.create_state(
+                fs, channels, mapping_family, application)
+
+    def __del__(self) -> None:
+        if hasattr(self, 'projection_encoder_state'):
+            # Destroying state only if __init__ completed successfully
+            opuslib_next.api.projection_encoder.destroy(
+                self.projection_encoder_state)
+
+    def reset_state(self) -> None:
+        """
+        Resets the codec state to be equivalent to a freshly initialized state
+        """
+        opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state, opuslib_next.api.ctl.reset_state)
+
+    def encode(self, pcm_data: bytes, frame_size: int) -> bytes:
+        """
+        Encodes given PCM data as Opus.
+        """
+        return opuslib_next.api.projection_encoder.encode(
+            self.projection_encoder_state,
+            pcm_data,
+            frame_size,
+            len(pcm_data)
+        )
+
+    def encode_float(self, pcm_data: bytes, frame_size: int) -> bytes:
+        """
+        Encodes given PCM data as Opus.
+        """
+        return opuslib_next.api.projection_encoder.encode_float(
+            self.projection_encoder_state,
+            pcm_data,
+            frame_size,
+            len(pcm_data)
+        )
+
+    def get_demixing_matrix(self, size: int | None = None) -> bytes:
+        """Gets the current projection demixing matrix."""
+        if size is None:
+            size = self.demixing_matrix_size
+        return opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state,
+            opuslib_next.api.ctl.get_demixing_matrix,
+            size
+        )
+
+    @property
+    def streams(self) -> int:
+        """Number of streams encoded from the input."""
+        return self._streams
+
+    @property
+    def coupled_streams(self) -> int:
+        """Number of coupled streams encoded from the input."""
+        return self._coupled_streams
+
+    demixing_matrix = property(lambda self: self.get_demixing_matrix())
+
+    # CTL interfaces
+
+    _get_final_range = \
+        lambda self: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state,
+            opuslib_next.api.ctl.get_final_range)
+
+    final_range = property(_get_final_range)
+
+    _get_bandwidth = \
+        lambda self: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state, opuslib_next.api.ctl.get_bandwidth)
+
+    bandwidth = property(_get_bandwidth)
+
+    _get_pitch = lambda self: opuslib_next.api.projection_encoder.encoder_ctl(
+        self.projection_encoder_state, opuslib_next.api.ctl.get_pitch)
+
+    pitch = property(_get_pitch)
+
+    _get_lsb_depth = \
+        lambda self: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state, opuslib_next.api.ctl.get_lsb_depth)
+
+    _set_lsb_depth = \
+        lambda self, x: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state,
+            opuslib_next.api.ctl.set_lsb_depth,
+            x)
+
+    lsb_depth = property(_get_lsb_depth, _set_lsb_depth)
+
+    _get_complexity = \
+        lambda self: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state, opuslib_next.api.ctl.get_complexity)
+
+    _set_complexity = \
+        lambda self, x: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state,
+            opuslib_next.api.ctl.set_complexity,
+            x)
+
+    complexity = property(_get_complexity, _set_complexity)
+
+    _get_bitrate = \
+        lambda self: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state, opuslib_next.api.ctl.get_bitrate)
+
+    _set_bitrate = \
+        lambda self, x: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state, opuslib_next.api.ctl.set_bitrate, x)
+
+    bitrate = property(_get_bitrate, _set_bitrate)
+
+    _get_vbr = lambda self: opuslib_next.api.projection_encoder.encoder_ctl(
+        self.projection_encoder_state, opuslib_next.api.ctl.get_vbr)
+
+    _set_vbr = \
+        lambda self, x: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state, opuslib_next.api.ctl.set_vbr, x)
+
+    vbr = property(_get_vbr, _set_vbr)
+
+    _get_vbr_constraint = \
+        lambda self: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state,
+            opuslib_next.api.ctl.get_vbr_constraint)
+
+    _set_vbr_constraint = \
+        lambda self, x: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state,
+            opuslib_next.api.ctl.set_vbr_constraint,
+            x)
+
+    vbr_constraint = property(_get_vbr_constraint, _set_vbr_constraint)
+
+    _get_force_channels = \
+        lambda self: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state,
+            opuslib_next.api.ctl.get_force_channels)
+
+    _set_force_channels = \
+        lambda self, x: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state,
+            opuslib_next.api.ctl.set_force_channels,
+            x)
+
+    force_channels = property(_get_force_channels, _set_force_channels)
+
+    _get_max_bandwidth = \
+        lambda self: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state,
+            opuslib_next.api.ctl.get_max_bandwidth)
+
+    _set_max_bandwidth = \
+        lambda self, x: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state,
+            opuslib_next.api.ctl.set_max_bandwidth,
+            x)
+
+    max_bandwidth = property(_get_max_bandwidth, _set_max_bandwidth)
+
+    _set_bandwidth = \
+        lambda self, x: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state,
+            opuslib_next.api.ctl.set_bandwidth,
+            x)
+
+    bandwidth = property(None, _set_bandwidth)
+
+    _get_signal = lambda self: opuslib_next.api.projection_encoder.encoder_ctl(
+        self.projection_encoder_state, opuslib_next.api.ctl.get_signal)
+
+    _set_signal = \
+        lambda self, x: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state, opuslib_next.api.ctl.set_signal, x)
+
+    signal = property(_get_signal, _set_signal)
+
+    _get_application = \
+        lambda self: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state,
+            opuslib_next.api.ctl.get_application)
+
+    _set_application = \
+        lambda self, x: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state,
+            opuslib_next.api.ctl.set_application,
+            x)
+
+    application = property(_get_application, _set_application)
+
+    _get_sample_rate = \
+        lambda self: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state,
+            opuslib_next.api.ctl.get_sample_rate)
+
+    sample_rate = property(_get_sample_rate)
+
+    _get_lookahead = \
+        lambda self: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state, opuslib_next.api.ctl.get_lookahead)
+
+    lookahead = property(_get_lookahead)
+
+    _get_inband_fec = \
+        lambda self: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state,
+            opuslib_next.api.ctl.get_inband_fec)
+
+    _set_inband_fec = \
+        lambda self, x: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state,
+            opuslib_next.api.ctl.set_inband_fec,
+            x)
+
+    inband_fec = property(_get_inband_fec, _set_inband_fec)
+
+    _get_packet_loss_perc = \
+        lambda self: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state,
+            opuslib_next.api.ctl.get_packet_loss_perc)
+
+    _set_packet_loss_perc = \
+        lambda self, x: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state,
+            opuslib_next.api.ctl.set_packet_loss_perc,
+            x)
+
+    packet_loss_perc = property(_get_packet_loss_perc, _set_packet_loss_perc)
+
+    _get_dtx = lambda self: opuslib_next.api.projection_encoder.encoder_ctl(
+        self.projection_encoder_state, opuslib_next.api.ctl.get_dtx)
+
+    _set_dtx = \
+        lambda self, x: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state, opuslib_next.api.ctl.set_dtx, x)
+
+    dtx = property(_get_dtx, _set_dtx)
+
+    _get_demixing_matrix_gain = \
+        lambda self: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state,
+            opuslib_next.api.ctl.get_demixing_matrix_gain)
+
+    demixing_matrix_gain = property(_get_demixing_matrix_gain)
+
+    _get_demixing_matrix_size = \
+        lambda self: opuslib_next.api.projection_encoder.encoder_ctl(
+            self.projection_encoder_state,
+            opuslib_next.api.ctl.get_demixing_matrix_size)
+
+    demixing_matrix_size = property(_get_demixing_matrix_size)
