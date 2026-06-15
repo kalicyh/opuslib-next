@@ -10,6 +10,8 @@ import opuslib_next.api
 import opuslib_next.api.ctl
 import opuslib_next.api.decoder
 import opuslib_next.api.encoder
+import opuslib_next.api.multistream_decoder
+import opuslib_next.api.multistream_encoder
 
 __author__ = 'kalicyh <kalicyh@qq.com>'
 __copyright__ = 'Copyright (c) 2025, Kalicyh'
@@ -319,5 +321,352 @@ class Encoder(object):
 
     _set_dtx = lambda self, x: opuslib_next.api.encoder.encoder_ctl(
         self.encoder_state, opuslib_next.api.ctl.set_dtx, x)
+
+    dtx = property(_get_dtx, _set_dtx)
+
+
+class MultiStreamDecoder(object):
+
+    """High-Level MultiStreamDecoder Object."""
+
+    def __init__(
+            self,
+            fs: int,
+            channels: int,
+            streams: int,
+            coupled_streams: int,
+            mapping: typing.Sequence[int]
+    ) -> None:
+        """
+        :param fs: Sample Rate.
+        :param channels: Number of output channels.
+        :param streams: Number of streams.
+        :param coupled_streams: Number of coupled streams.
+        :param mapping: Channel mapping table.
+        """
+        self._fs = fs
+        self._channels = channels
+        self._streams = streams
+        self._coupled_streams = coupled_streams
+        self._mapping = mapping
+        self.msdecoder_state = \
+            opuslib_next.api.multistream_decoder.create_state(
+                fs, channels, streams, coupled_streams, mapping)
+
+    def __del__(self) -> None:
+        if hasattr(self, 'msdecoder_state'):
+            # Destroying state only if __init__ completed successfully
+            opuslib_next.api.multistream_decoder.destroy(self.msdecoder_state)
+
+    def reset_state(self) -> None:
+        """
+        Resets the codec state to be equivalent to a freshly initialized state
+        """
+        opuslib_next.api.multistream_decoder.decoder_ctl(
+            self.msdecoder_state,
+            opuslib_next.api.ctl.reset_state
+        )
+
+    # FIXME: Remove typing.Any once we have a stub for ctypes
+    def decode(
+            self,
+            opus_data: bytes,
+            frame_size: int,
+            decode_fec: bool = False
+        ) -> typing.Union[bytes, typing.Any]:
+        """
+        Decodes given Opus data to PCM.
+        """
+        return opuslib_next.api.multistream_decoder.decode(
+            self.msdecoder_state,
+            opus_data,
+            len(opus_data),
+            frame_size,
+            decode_fec,
+            channels=self._channels
+        )
+
+    # FIXME: Remove typing.Any once we have a stub for ctypes
+    def decode_float(
+            self,
+            opus_data: bytes,
+            frame_size: int,
+            decode_fec: bool = False
+        ) -> typing.Union[bytes, typing.Any]:
+        """
+        Decodes given Opus data to PCM.
+        """
+        return opuslib_next.api.multistream_decoder.decode_float(
+            self.msdecoder_state,
+            opus_data,
+            len(opus_data),
+            frame_size,
+            decode_fec,
+            channels=self._channels
+        )
+
+    # CTL interfaces
+
+    _get_final_range = \
+        lambda self: opuslib_next.api.multistream_decoder.decoder_ctl(
+            self.msdecoder_state, opuslib_next.api.ctl.get_final_range)
+
+    final_range = property(_get_final_range)
+
+    _get_bandwidth = \
+        lambda self: opuslib_next.api.multistream_decoder.decoder_ctl(
+            self.msdecoder_state, opuslib_next.api.ctl.get_bandwidth)
+
+    bandwidth = property(_get_bandwidth)
+
+    _get_pitch = lambda self: opuslib_next.api.multistream_decoder.decoder_ctl(
+        self.msdecoder_state, opuslib_next.api.ctl.get_pitch)
+
+    pitch = property(_get_pitch)
+
+    _get_lsb_depth = \
+        lambda self: opuslib_next.api.multistream_decoder.decoder_ctl(
+            self.msdecoder_state, opuslib_next.api.ctl.get_lsb_depth)
+
+    _set_lsb_depth = \
+        lambda self, x: opuslib_next.api.multistream_decoder.decoder_ctl(
+            self.msdecoder_state, opuslib_next.api.ctl.set_lsb_depth, x)
+
+    lsb_depth = property(_get_lsb_depth, _set_lsb_depth)
+
+    _get_gain = lambda self: opuslib_next.api.multistream_decoder.decoder_ctl(
+        self.msdecoder_state, opuslib_next.api.ctl.get_gain)
+
+    _set_gain = \
+        lambda self, x: opuslib_next.api.multistream_decoder.decoder_ctl(
+            self.msdecoder_state, opuslib_next.api.ctl.set_gain, x)
+
+    gain = property(_get_gain, _set_gain)
+
+
+class MultiStreamEncoder(object):
+
+    """High-Level MultiStreamEncoder Object."""
+
+    def __init__(
+            self,
+            fs: int,
+            channels: int,
+            streams: int,
+            coupled_streams: int,
+            mapping: typing.Sequence[int],
+            application: int
+    ) -> None:
+        """
+        Parameters:
+            fs : sampling rate
+            channels : number of channels
+            streams : number of streams
+            coupled_streams : number of coupled streams
+            mapping : channel mapping table
+        """
+        # Check to see if the Encoder Application Macro is available:
+        if application in list(opuslib_next.APPLICATION_TYPES_MAP.keys()):
+            application = opuslib_next.APPLICATION_TYPES_MAP[application]
+        elif application in list(opuslib_next.APPLICATION_TYPES_MAP.values()):
+            pass  # Nothing to do here
+        else:
+            raise ValueError(
+                "`application` value must be in 'voip', 'audio' or "
+                "'restricted_lowdelay'")
+
+        self._fs = fs
+        self._channels = channels
+        self._streams = streams
+        self._coupled_streams = coupled_streams
+        self._mapping = mapping
+        self._application = application
+        self.msencoder_state = \
+            opuslib_next.api.multistream_encoder.create_state(
+                fs, channels, streams, coupled_streams, mapping, application)
+
+    def __del__(self) -> None:
+        if hasattr(self, 'msencoder_state'):
+            # Destroying state only if __init__ completed successfully
+            opuslib_next.api.multistream_encoder.destroy(self.msencoder_state)
+
+    def reset_state(self) -> None:
+        """
+        Resets the codec state to be equivalent to a freshly initialized state
+        """
+        opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.reset_state)
+
+    def encode(self, pcm_data: bytes, frame_size: int) -> bytes:
+        """
+        Encodes given PCM data as Opus.
+        """
+        return opuslib_next.api.multistream_encoder.encode(
+            self.msencoder_state,
+            pcm_data,
+            frame_size,
+            len(pcm_data)
+        )
+
+    def encode_float(self, pcm_data: bytes, frame_size: int) -> bytes:
+        """
+        Encodes given PCM data as Opus.
+        """
+        return opuslib_next.api.multistream_encoder.encode_float(
+            self.msencoder_state,
+            pcm_data,
+            frame_size,
+            len(pcm_data)
+        )
+
+    # CTL interfaces
+
+    _get_final_range = \
+        lambda self: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.get_final_range)
+
+    final_range = property(_get_final_range)
+
+    _get_bandwidth = \
+        lambda self: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.get_bandwidth)
+
+    _get_pitch = lambda self: opuslib_next.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, opuslib_next.api.ctl.get_pitch)
+
+    pitch = property(_get_pitch)
+
+    _get_lsb_depth = \
+        lambda self: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.get_lsb_depth)
+
+    _set_lsb_depth = \
+        lambda self, x: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.set_lsb_depth, x)
+
+    lsb_depth = property(_get_lsb_depth, _set_lsb_depth)
+
+    _get_complexity = \
+        lambda self: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.get_complexity)
+
+    _set_complexity = \
+        lambda self, x: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.set_complexity, x)
+
+    complexity = property(_get_complexity, _set_complexity)
+
+    _get_bitrate = \
+        lambda self: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.get_bitrate)
+
+    _set_bitrate = \
+        lambda self, x: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.set_bitrate, x)
+
+    bitrate = property(_get_bitrate, _set_bitrate)
+
+    _get_vbr = lambda self: opuslib_next.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, opuslib_next.api.ctl.get_vbr)
+
+    _set_vbr = \
+        lambda self, x: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.set_vbr, x)
+
+    vbr = property(_get_vbr, _set_vbr)
+
+    _get_vbr_constraint = \
+        lambda self: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.get_vbr_constraint)
+
+    _set_vbr_constraint = \
+        lambda self, x: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.set_vbr_constraint, x)
+
+    vbr_constraint = property(_get_vbr_constraint, _set_vbr_constraint)
+
+    _get_force_channels = \
+        lambda self: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.get_force_channels)
+
+    _set_force_channels = \
+        lambda self, x: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.set_force_channels, x)
+
+    force_channels = property(_get_force_channels, _set_force_channels)
+
+    _get_max_bandwidth = \
+        lambda self: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.get_max_bandwidth)
+
+    _set_max_bandwidth = \
+        lambda self, x: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.set_max_bandwidth, x)
+
+    max_bandwidth = property(_get_max_bandwidth, _set_max_bandwidth)
+
+    _set_bandwidth = \
+        lambda self, x: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.set_bandwidth, x)
+
+    bandwidth = property(None, _set_bandwidth)
+
+    _get_signal = lambda self: opuslib_next.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, opuslib_next.api.ctl.get_signal)
+
+    _set_signal = \
+        lambda self, x: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.set_signal, x)
+
+    signal = property(_get_signal, _set_signal)
+
+    _get_application = \
+        lambda self: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.get_application)
+
+    _set_application = \
+        lambda self, x: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.set_application, x)
+
+    application = property(_get_application, _set_application)
+
+    _get_sample_rate = \
+        lambda self: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.get_sample_rate)
+
+    sample_rate = property(_get_sample_rate)
+
+    _get_lookahead = \
+        lambda self: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.get_lookahead)
+
+    lookahead = property(_get_lookahead)
+
+    _get_inband_fec = \
+        lambda self: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.get_inband_fec)
+
+    _set_inband_fec = \
+        lambda self, x: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.set_inband_fec, x)
+
+    inband_fec = property(_get_inband_fec, _set_inband_fec)
+
+    _get_packet_loss_perc = \
+        lambda self: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.get_packet_loss_perc)
+
+    _set_packet_loss_perc = \
+        lambda self, x: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.set_packet_loss_perc, x)
+
+    packet_loss_perc = property(_get_packet_loss_perc, _set_packet_loss_perc)
+
+    _get_dtx = lambda self: opuslib_next.api.multistream_encoder.encoder_ctl(
+        self.msencoder_state, opuslib_next.api.ctl.get_dtx)
+
+    _set_dtx = \
+        lambda self, x: opuslib_next.api.multistream_encoder.encoder_ctl(
+            self.msencoder_state, opuslib_next.api.ctl.set_dtx, x)
 
     dtx = property(_get_dtx, _set_dtx)

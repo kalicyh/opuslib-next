@@ -22,7 +22,12 @@ from .constants import *  # NOQA
 
 from .constants import OK, APPLICATION_TYPES_MAP  # NOQA
 
-from .classes import Encoder, Decoder  # NOQA
+from .classes import (  # NOQA
+    Decoder,
+    Encoder,
+    MultiStreamDecoder,
+    MultiStreamEncoder,
+)
 
 __author__ = 'kalicyh <kalicyh@qq.com>'
 __copyright__ = 'Copyright (c) 2025, Kalicyh'
