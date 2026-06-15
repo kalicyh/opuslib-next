@@ -28,3 +28,13 @@ class EncoderTest(unittest.TestCase):
     def test_reset_state(cls):
         encoder = opuslib_next.Encoder(48000, 2, opuslib_next.APPLICATION_AUDIO)
         encoder.reset_state()
+
+    def test_inband_fec_property(self):
+        encoder = opuslib_next.Encoder(
+            16000, 1, opuslib_next.APPLICATION_VOIP)
+
+        encoder.inband_fec = 1
+        self.assertEqual(encoder.inband_fec, 1)
+
+        encoder.inband_fec = 0
+        self.assertEqual(encoder.inband_fec, 0)

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "opuslib-next"
-version = "1.1.6"
+version = "1.1.7"
 description = "Python bindings to the libopus, IETF low-delay audio codec"
 readme = "README.md"
 requires-python = ">=3.10"
