@@ -36,6 +36,20 @@ jobs:
       - name: Sync dependencies
         run: uv sync --dev --frozen --python 3.12
 
+      - name: Verify libopus APIs
+        run: |
+          uv run --python 3.12 python - <<'PY'
+          import opuslib_next.api.multistream_decoder as msd
+          import opuslib_next.api.multistream_encoder as mse
+          import opuslib_next.api.projection_decoder as pd
+          import opuslib_next.api.projection_encoder as pe
+
+          print("multistream encoder size:", mse.get_size(1, 1))
+          print("multistream decoder size:", msd.get_size(1, 1))
+          print("projection encoder size:", pe.get_size(4, 3))
+          print("projection decoder size:", pd.get_size(4, 2, 2))
+          PY
+
       - name: Run tests
         run: uv run --python 3.12 pytest -q
 
