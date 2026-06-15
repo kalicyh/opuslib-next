@@ -193,6 +193,38 @@ set_dtx = ctl_set(opuslib_next.SET_DTX_REQUEST)
 get_dtx = get(opuslib_next.GET_DTX_REQUEST, ctypes.c_int)
 
 #
+# Projection related CTLs
+#
+
+# Gets the gain of the demixing matrix from the encoder
+get_demixing_matrix_gain = get(
+    opuslib_next.PROJECTION_GET_DEMIXING_MATRIX_GAIN_REQUEST,
+    ctypes.c_int
+)
+
+# Gets the size in bytes of the demixing matrix from the encoder
+get_demixing_matrix_size = get(
+    opuslib_next.PROJECTION_GET_DEMIXING_MATRIX_SIZE_REQUEST,
+    ctypes.c_int
+)
+
+
+def get_demixing_matrix(func, obj, size):
+    """Gets the demixing matrix from a projection encoder."""
+    result = (ctypes.c_ubyte * size)()
+    result_code = func(
+        obj,
+        opuslib_next.PROJECTION_GET_DEMIXING_MATRIX_REQUEST,
+        result,
+        size
+    )
+
+    if result_code != opuslib_next.OK:
+        raise opuslib_next.exceptions.OpusError(result_code)
+
+    return bytes(result)
+
+#
 # Other stuff
 #
 
