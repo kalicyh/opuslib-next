@@ -1,22 +1,13 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# pylint: disable=invalid-name,too-few-public-methods
-#
-
 """
 CTypes mapping between libopus functions and Python.
 """
 
 import array
-import ctypes  # type: ignore
+import ctypes
 import typing
 
 import opuslib_next
 import opuslib_next.api
-
-__author__ = 'kalicyh <kalicyh@qq.com>'
-__copyright__ = 'Copyright (c) 2025, Kalicyh'
-__license__ = 'BSD 3-Clause License'
 
 
 class Decoder(ctypes.Structure):
@@ -95,7 +86,7 @@ def packet_get_bandwidth(data: bytes) -> typing.Union[int, typing.Any]:
     return result
 
 
-libopus_packet_get_nb_channels = opuslib_next.api.libopus.opus_packet_get_nb_channels  # NOQA
+libopus_packet_get_nb_channels = opuslib_next.api.libopus.opus_packet_get_nb_channels
 # `argtypes` must be a sequence (,) of types!
 libopus_packet_get_nb_channels.argtypes = (ctypes.c_char_p,)
 libopus_packet_get_nb_channels.restype = ctypes.c_int
@@ -215,7 +206,7 @@ libopus_decode.restype = ctypes.c_int
 
 
 # FIXME: Remove typing.Any once we have a stub for ctypes
-def decode(  # pylint: disable=too-many-arguments
+def decode(
         decoder_state: ctypes.Structure,
         opus_data: bytes,
         length: int,
@@ -264,7 +255,7 @@ libopus_decode_float.restype = ctypes.c_int
 
 
 # FIXME: Remove typing.Any once we have a stub for ctypes
-def decode_float(  # pylint: disable=too-many-arguments
+def decode_float(
         decoder_state: ctypes.Structure,
         opus_data: bytes,
         length: int,

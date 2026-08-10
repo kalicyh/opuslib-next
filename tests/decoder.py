@@ -1,18 +1,9 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# pylint: disable=missing-docstring
-#
-
 import sys
 import unittest
 
 import opuslib_next.api
 import opuslib_next.api.decoder
 import opuslib_next.api.ctl
-
-__author__ = 'kalicyh <kalicyh@qq.com>'
-__copyright__ = 'Copyright (c) 2025, Kalicyh'
-__license__ = 'BSD 3-Clause License'
 
 
 class DecoderTest(unittest.TestCase):
@@ -66,9 +57,6 @@ class DecoderTest(unittest.TestCase):
             raise AssertionError()
         else:
             opuslib_next.api.decoder.destroy(dec)
-
-            # TODO: rewrite this code
-        # VG_CHECK(dec,opus_decoder_get_size(2));
 
     @classmethod
     def test_get_final_range(cls):
@@ -193,19 +181,19 @@ class DecoderTest(unittest.TestCase):
                 packet = bytes([ixc, jxc])
 
                 self.assertEqual(
-                    expected_result if expected_result != 3 else (packet[1] & 63),  # NOQA
+                    expected_result if expected_result != 3 else (packet[1] & 63),
                     opuslib_next.api.decoder.packet_get_nb_frames(packet, 2)
                 )
 
     def test_packet_get_bandwidth(self):
-        """Tests `opuslib.api.decoder.opus_packet_get_bandwidth()`"""
+        """Tests `opuslib_next.api.decoder.packet_get_bandwidth()`."""
 
         for ixc in range(0, 256):
             packet = bytes([ixc])
             bwx = ixc >> 4
 
             # Very cozy code from the test_opus_api.c
-            _bwx = opuslib_next.BANDWIDTH_NARROWBAND + (((((bwx & 7) * 9) & (63 - (bwx & 8))) + 2 + 12 * ((bwx & 8) != 0)) >> 4)  # NOQA pylint: disable=line-too-long
+            _bwx = opuslib_next.BANDWIDTH_NARROWBAND + (((((bwx & 7) * 9) & (63 - (bwx & 8))) + 2 + 12 * ((bwx & 8) != 0)) >> 4)
 
             self.assertEqual(
                 _bwx, opuslib_next.api.decoder.packet_get_bandwidth(packet)

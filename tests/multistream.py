@@ -1,9 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# pylint: disable=missing-docstring
-#
-
-import ctypes  # type: ignore
+import ctypes
 import unittest
 
 import opuslib_next

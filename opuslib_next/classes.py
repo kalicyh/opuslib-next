@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """High-level interface to a Opus decoder functions"""
 
 import typing
@@ -14,10 +11,6 @@ import opuslib_next.api.multistream_decoder
 import opuslib_next.api.multistream_encoder
 import opuslib_next.api.projection_decoder
 import opuslib_next.api.projection_encoder
-
-__author__ = 'kalicyh <kalicyh@qq.com>'
-__copyright__ = 'Copyright (c) 2025, Kalicyh'
-__license__ = 'BSD 3-Clause License'
 
 
 class Decoder(object):

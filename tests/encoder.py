@@ -1,19 +1,10 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# pylint: disable=missing-docstring
-#
-
-import ctypes  # type: ignore
+import ctypes
 import sys
 import unittest
 
 import opuslib_next.api
 import opuslib_next.api.encoder
 import opuslib_next.api.ctl
-
-__author__ = 'kalicyh <kalicyh@qq.com>'
-__copyright__ = 'Copyright (c) 2025, Kalicyh'
-__license__ = 'BSD 3-Clause License'
 
 
 class EncoderTest(unittest.TestCase):
@@ -56,19 +47,10 @@ class EncoderTest(unittest.TestCase):
 
         enc = opuslib_next.api.encoder.create_state(
             48000, 2, opuslib_next.APPLICATION_RESTRICTED_LOWDELAY)
-        # TODO: rewrite that code
-        # i = opuslib.api.encoder.encoder_ctl(
-        #     enc, opuslib.api.ctl.get_lookahead)
-        # if(err!=OPUS_OK || i<0 || i>32766)test_failed();
         opuslib_next.api.encoder.destroy(enc)
 
         enc = opuslib_next.api.encoder.create_state(
             48000, 2, opuslib_next.APPLICATION_AUDIO)
-        # TODO: rewrite that code
-        # i = opuslib.api.encoder.encoder_ctl(
-        #     enc, opuslib.api.ctl.get_lookahead)
-        # err=opus_encoder_ctl(enc,OPUS_GET_LOOKAHEAD(&i));
-        # if(err!=OPUS_OK || i<0 || i>32766)test_failed();
         opuslib_next.api.encoder.destroy(enc)
 
     @classmethod

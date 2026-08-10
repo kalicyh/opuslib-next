@@ -35,11 +35,7 @@ Repository = "https://github.com/kalicyh/opuslib-next"
 Issues = "https://github.com/kalicyh/opuslib-next/issues"
 
 [dependency-groups]
-dev = [
-    "build>=1.2.2",
-    "pytest>=8.3.5",
-    "twine>=6.1.0",
-]
+dev = ["pytest>=8.3.5"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["opuslib_next"]

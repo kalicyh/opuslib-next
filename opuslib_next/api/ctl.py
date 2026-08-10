@@ -1,25 +1,17 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# pylint: disable=invalid-name
-
 """CTL macros rewritten to Python
 
 Usage example:
 
->>> import opuslib.api.decoder
->>> import opuslib.api.ctl
->>> dec = opuslib.api.decoder.create_state(48000, 2)
->>> opuslib.api.decoder.decoder_ctl(dec, opuslib.api.ctl.set_gain, -15)
->>> gain_value = opuslib.api.decoder.decoder_ctl(dec, opuslib.api.ctl.get_gain)
+>>> import opuslib_next.api.decoder
+>>> import opuslib_next.api.ctl
+>>> dec = opuslib_next.api.decoder.create_state(48000, 2)
+>>> opuslib_next.api.decoder.decoder_ctl(dec, opuslib_next.api.ctl.set_gain, -15)
+>>> gain_value = opuslib_next.api.decoder.decoder_ctl(dec, opuslib_next.api.ctl.get_gain)
 
 """
 
-__author__ = 'kalicyh <kalicyh@qq.com>'
-__copyright__ = 'Copyright (c) 2025, Kalicyh'
-__license__ = 'BSD 3-Clause License'
 
-
-import ctypes  # type: ignore
+import ctypes
 
 import opuslib_next.api
 import opuslib_next.exceptions
@@ -72,7 +64,7 @@ def ctl_set(request):
 #
 
 # Resets the codec state to be equivalent to a freshly initialized state
-reset_state = query(opuslib_next.RESET_STATE)  # NOQA
+reset_state = query(opuslib_next.RESET_STATE)
 
 # Gets the final state of the codec's entropy coder
 get_final_range = get(

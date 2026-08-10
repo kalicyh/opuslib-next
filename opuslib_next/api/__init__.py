@@ -1,18 +1,9 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# pylint: disable=invalid-name
-#
-
 """OpusLib Package."""
 
-import ctypes  # type: ignore
+import ctypes
 import os
 import platform
-from ctypes.util import find_library  # type: ignore
-
-__author__ = "kalicyh <kalicyh@qq.com>"
-__copyright__ = "Copyright (c) 2025, Kalicyh"
-__license__ = "BSD 3-Clause License"
+from ctypes.util import find_library
 
 
 lib_location = find_library("opus")

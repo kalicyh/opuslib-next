@@ -1,26 +1,17 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# pylint: disable=invalid-name
-#
-
 """
 CTypes mapping between libopus projection encoder functions and Python.
 """
 
 import array
-import ctypes  # type: ignore
+import ctypes
 import functools
 import typing
 
 import opuslib_next
 import opuslib_next.api
 
-__author__ = 'kalicyh <kalicyh@qq.com>'
-__copyright__ = 'Copyright (c) 2025, Kalicyh'
-__license__ = 'BSD 3-Clause License'
 
-
-class ProjectionEncoder(ctypes.Structure):  # pylint: disable=too-few-public-methods
+class ProjectionEncoder(ctypes.Structure):
     """Opus projection encoder state."""
     pass
 
