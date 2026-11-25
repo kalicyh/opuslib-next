@@ -5,6 +5,7 @@ import json
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 
@@ -108,13 +109,17 @@ print(json.dumps({
 
 
 def run(cmd: list[str], cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        cmd,
-        cwd=cwd,
-        text=True,
-        capture_output=True,
-        check=True,
-    )
+    try:
+        return subprocess.run(
+            cmd,
+            cwd=cwd,
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError as exc:
+        sys.stderr.write(exc.stderr)
+        raise
 
 
 def build_project(project_dir: Path, dist_dir: Path) -> Path:
@@ -141,10 +146,19 @@ def install_requirement(
     requirement: str,
     index_url: str | None = None,
 ) -> None:
-    cmd = ["uv", "pip", "install", "--python", str(python_path)]
+    cmd = ["uv", "pip", "install", "--refresh", "--python", str(python_path)]
     if index_url:
         cmd.extend(["--index-url", index_url])
     cmd.append(requirement)
+
+    # A new release can appear in the PyPI JSON API before it is installable.
+    for delay in (5, 10):
+        try:
+            run(cmd)
+            return
+        except subprocess.CalledProcessError:
+            print(f"Baseline install failed. Retrying in {delay}s.", file=sys.stderr)
+            time.sleep(delay)
     run(cmd)
 
 

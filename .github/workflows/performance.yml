@@ -8,7 +8,26 @@ on:
   workflow_dispatch:
 
 jobs:
+  resolve-baseline:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.latest.outputs.version }}
+    steps:
+      - name: Resolve latest published version
+        id: latest
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import urllib.request
+
+          with urllib.request.urlopen("https://pypi.org/pypi/opuslib-next/json", timeout=30) as response:
+              payload = json.load(response)
+
+          print(f"version={payload['info']['version']}")
+          PY
+
   benchmark:
+    needs: resolve-baseline
     name: Benchmark (${{ matrix.python-version }})
     runs-on: ubuntu-latest
     strategy:
@@ -39,30 +58,20 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libopus0 libopus-dev
 
-      - name: Resolve latest published version
-        id: latest
-        run: |
-          python - <<'PY' >> "$GITHUB_OUTPUT"
-          import json
-          import urllib.request
-
-          with urllib.request.urlopen("https://pypi.org/pypi/opuslib-next/json", timeout=30) as response:
-              payload = json.load(response)
-
-          print(f"version={payload['info']['version']}")
-          PY
-
       - name: Sync dependencies
         run: uv sync --dev --frozen --python ${{ matrix.python-version }}
 
       - name: Run benchmark comparison
+        shell: bash
+        env:
+          BASELINE_VERSION: ${{ needs.resolve-baseline.outputs.version }}
         run: |
           mkdir -p bench-results
           uv run --python ${{ matrix.python-version }} \
             python benchmarks/compare_versions.py \
-            --baseline-version "${{ steps.latest.outputs.version }}" \
+            --baseline-version "$BASELINE_VERSION" \
             --output-json "bench-results/python-${{ matrix.python-version }}.json" \
-            | tee "bench-results/python-${{ matrix.python-version }}.txt"
+            2>&1 | tee "bench-results/python-${{ matrix.python-version }}.txt"
 
       - name: Write job summary
         run: |
