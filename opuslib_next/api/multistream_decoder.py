@@ -2,7 +2,6 @@
 CTypes mapping between libopus multistream decoder functions and Python.
 """
 
-import array
 import ctypes
 import functools
 import typing
@@ -129,7 +128,8 @@ def decode(
     if result < 0:
         raise opuslib_next.exceptions.OpusError(result)
 
-    return array.array('h', pcm_pointer[:result * channels]).tobytes()
+    byte_count = result * channels * ctypes.sizeof(ctypes.c_int16)
+    return ctypes.string_at(pcm, byte_count)
 
 
 @functools.lru_cache(maxsize=None)
@@ -174,7 +174,8 @@ def decode_float(
     if result < 0:
         raise opuslib_next.exceptions.OpusError(result)
 
-    return array.array('f', pcm[:result * channels]).tobytes()
+    byte_count = result * channels * ctypes.sizeof(ctypes.c_float)
+    return ctypes.string_at(pcm, byte_count)
 
 
 @functools.lru_cache(maxsize=None)

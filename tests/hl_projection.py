@@ -72,9 +72,10 @@ class HighLevelProjectionTest(unittest.TestCase):
         pcm = b'\x00' * ctypes.sizeof(ctypes.c_int16) * CHANNELS * frame_size
 
         packet = encoder.encode(pcm, frame_size)
-        decoded = decoder.decode(packet, frame_size)
+        decoded = decoder.decode(packet, frame_size * 2)
 
         self.assertGreater(len(packet), 0)
+        self.assertIsInstance(decoded, bytes)
         self.assertEqual(
             len(decoded),
             ctypes.sizeof(ctypes.c_int16) * CHANNELS * frame_size
@@ -86,9 +87,10 @@ class HighLevelProjectionTest(unittest.TestCase):
         pcm = b'\x00' * ctypes.sizeof(ctypes.c_float) * CHANNELS * frame_size
 
         packet = encoder.encode_float(pcm, frame_size)
-        decoded = decoder.decode_float(packet, frame_size)
+        decoded = decoder.decode_float(packet, frame_size * 2)
 
         self.assertGreater(len(packet), 0)
+        self.assertIsInstance(decoded, bytes)
         self.assertEqual(
             len(decoded),
             ctypes.sizeof(ctypes.c_float) * CHANNELS * frame_size

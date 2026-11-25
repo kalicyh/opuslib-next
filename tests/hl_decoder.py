@@ -1,5 +1,6 @@
 """Tests for a high-level Decoder object"""
 
+import ctypes
 import unittest
 
 import opuslib_next
@@ -79,15 +80,21 @@ class DecoderTest(unittest.TestCase):
             self.assertEqual(exc.code, opuslib_next.BUFFER_TOO_SMALL)
 
         try:
-            decoder.decode(packet, frame_size=960)
+            decoded = decoder.decode(packet, frame_size=1920)
         except opuslib_next.OpusError:
             self.fail('Decode failed')
+
+        self.assertIsInstance(decoded, bytes)
+        self.assertEqual(len(decoded), 960 * 2 * ctypes.sizeof(ctypes.c_int16))
 
     def test_decode_float(self):
         decoder = opuslib_next.Decoder(48000, 2)
         packet = bytes([252, 0, 0])
 
         try:
-            decoder.decode_float(packet, frame_size=960)
+            decoded = decoder.decode_float(packet, frame_size=1920)
         except opuslib_next.OpusError:
             self.fail('Decode failed')
+
+        self.assertIsInstance(decoded, bytes)
+        self.assertEqual(len(decoded), 960 * 2 * ctypes.sizeof(ctypes.c_float))
