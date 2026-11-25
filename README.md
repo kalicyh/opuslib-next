@@ -1,5 +1,7 @@
 # opuslib-next
 
+[![Monthly PyPI downloads](https://img.shields.io/pypi/dm/opuslib-next?label=PyPI%20downloads)](https://pypistats.org/packages/opuslib-next)
+
 Python bindings to the libopus, IETF low-delay audio codec.
 
 ## Installation
