@@ -10,6 +10,7 @@ from pathlib import Path
 
 BENCHMARK_CODE = r"""
 import array
+from importlib.metadata import version
 import json
 import math
 import statistics
@@ -99,7 +100,8 @@ results = [
 ]
 
 print(json.dumps({
-    "package_version": getattr(opuslib_next, "__version__", "unknown"),
+    "package_version": version("opuslib-next"),
+    "package_path": opuslib_next.__file__,
     "results": results,
 }))
 """
@@ -147,7 +149,7 @@ def install_requirement(
 
 
 def run_benchmark(python_path: Path) -> dict:
-    completed = run([str(python_path), "-c", BENCHMARK_CODE])
+    completed = run([str(python_path), "-I", "-c", BENCHMARK_CODE])
     return json.loads(completed.stdout)
 
 
